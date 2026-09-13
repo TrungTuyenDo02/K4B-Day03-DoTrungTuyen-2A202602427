@@ -1,0 +1,93 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "Chào bạn, bạn có thể giới thiệu quy định đóng quỹ hàng tháng của đội bóng mình không?",
+    "expected_behavior": "Chatbot trả lời trực tiếp từ System Prompt (thông tin chung về quy định quỹ đội), không cần gọi bất kỳ Tool nào.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_call",
+    "question": "Cho mình xem hồ sơ và tình trạng đóng quỹ của thành viên mã TM001.",
+    "expected_behavior": "Chatbot gọi tool 'member_query' với tham số member_id='TM001', trả về hồ sơ (tên, vị trí, trạng thái) và tình trạng quỹ.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC03",
+    "type": "single_tool_call",
+    "question": "Thành viên TM002 còn nợ quỹ bao nhiêu tiền vậy?",
+    "expected_behavior": "Chatbot gọi tool 'member_query' với member_id='TM002', sau đó trích riêng thông tin debt_amount để trả lời trực tiếp câu hỏi.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC04",
+    "type": "single_tool_call",
+    "question": "Tháng 9 năm 2026 đội mình thu chi ngân sách như thế nào? Còn dư bao nhiêu?",
+    "expected_behavior": "Chatbot gọi tool 'get_team_budget_summary' với month=9, year=2026, trả về tổng thu, tổng chi và số dư (balance).",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC05",
+    "type": "single_tool_call",
+    "question": "Thời tiết ở Hà Nội ngày 20/09/2026 thế nào, có mưa không?",
+    "expected_behavior": "Chatbot gọi tool 'get_weather_forecast' với location='Ha Noi', date_str='20/09/2026', trả về nhiệt độ, mô tả thời tiết và xác suất mưa.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC06",
+    "type": "single_tool_call",
+    "question": "Thêm một thành viên mới tên Lê Văn Cường, mã TM003, chơi vị trí hậu vệ vào đội nhé.",
+    "expected_behavior": "Chatbot gọi tool 'update_member_status' với member_id='TM003', new_status='moi_them', full_name='Lê Văn Cường', position='Hậu vệ'.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC07",
+    "type": "single_tool_call",
+    "question": "Cho TM001 nghỉ tạm thời, bạn ấy bận công việc không tham gia đội được nữa trong thời gian tới.",
+    "expected_behavior": "Chatbot gọi tool 'update_member_status' với member_id='TM001', new_status='nghi'.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC08",
+    "type": "single_tool_call",
+    "question": "Nhắc TM002 đóng quỹ vào buổi tập lúc 18h ngày 20/09/2026 tại sân Thành Công nhé.",
+    "expected_behavior": "Chatbot gọi tool 'schedule_fee_reminder' với member_id='TM002', datetime_str='18:00 20/09/2026', location='Sân Thành Công', event_type='tap_luyen'.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC09",
+    "type": "multi_step_tool_call",
+    "question": "Kiểm tra thời tiết Hà Nội ngày 20/09/2026 giúp mình, nếu trời không mưa thì nhắc TM001 đóng quỹ cho trận đấu hôm đó tại sân Thành Công lúc 18h.",
+    "expected_behavior": "Chatbot gọi tuần tự: (1) 'get_weather_forecast' để kiểm tra dự báo; (2) dựa vào kết quả rain_probability, nếu thấp thì tiếp tục gọi 'schedule_fee_reminder' với event_type='thi_dau'. Đây là bài test Dynamic Decision - bước sau phụ thuộc kết quả bước trước.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC10",
+    "type": "multi_tool_call",
+    "question": "Cho mình biết tình trạng đóng quỹ của TM001 và tổng ngân sách đội tháng 9/2026 luôn thể.",
+    "expected_behavior": "Chatbot gọi 2 tool độc lập: 'member_query' (member_id='TM001') và 'get_team_budget_summary' (month=9, year=2026), rồi tổng hợp cả hai kết quả vào một câu trả lời.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC11",
+    "type": "edge_case",
+    "question": "Cho mình xem hồ sơ thành viên mã TM999.",
+    "expected_behavior": "Chatbot gọi tool 'member_query' với member_id='TM999', tool trả về status='NOT_FOUND', chatbot thông báo lại cho người dùng là không tìm thấy thành viên này, không được tự bịa thông tin.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC12",
+    "type": "edge_case",
+    "question": "Nhắc thành viên TM005 đóng quỹ giúp mình.",
+    "expected_behavior": "Câu hỏi thiếu tham số bắt buộc (datetime_str, location, event_type) của tool 'schedule_fee_reminder'. Chatbot phải hỏi lại người dùng để làm rõ thời gian, địa điểm và loại sự kiện trước khi gọi tool, không được tự suy đoán giá trị mặc định.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC13",
+    "type": "out_of_scope",
+    "question": "Bạn nghĩ đội mình nên đá đội hình 4-3-3 hay 4-4-2 trong trận tới?",
+    "expected_behavior": "Chatbot từ chối lịch sự vì đây là câu hỏi về chiến thuật thi đấu, nằm ngoài phạm vi thiết kế của agent (agent chỉ quản lý thành viên, quỹ, lịch và thời tiết), không gọi tool nào.",
+    "complexity": "Medium"
+  }
+]

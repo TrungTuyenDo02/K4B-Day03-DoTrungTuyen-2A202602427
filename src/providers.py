@@ -36,27 +36,41 @@ class MockOfflineProvider(BaseLLMProvider):
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
-        
+
         # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+        if "nhắc" in prompt_lower and ("quỹ" in prompt_lower or "đóng" in prompt_lower):
             return {
                 "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
+                "tool_name": "schedule_fee_reminder",
+                "arguments": {"member_id": "TM002", "datetime_str": "18:00 20/09/2026", "location": "Sân Thành Công", "event_type": "tap_luyen"},
+                "thought": "Người dùng yêu cầu đặt lịch nhắc đóng quỹ gắn với buổi tập. Tôi sẽ gọi tool schedule_fee_reminder."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        elif "ngân sách" in prompt_lower or "thu chi" in prompt_lower:
             return {
                 "type": "tool_call",
-                "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "tool_name": "get_team_budget_summary",
+                "arguments": {"month": 9, "year": 2026},
+                "thought": "Người dùng muốn xem tổng hợp thu - chi ngân sách đội. Tôi sẽ gọi tool get_team_budget_summary."
+            }
+        elif "thời tiết" in prompt_lower or "mưa" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "get_weather_forecast",
+                "arguments": {"location": "Ha Noi", "date_str": "20/09/2026"},
+                "thought": "Người dùng muốn xem dự báo thời tiết. Tôi sẽ gọi tool get_weather_forecast."
+            }
+        elif "tm00" in prompt_lower or "tra cứu" in prompt_lower or "hồ sơ" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "member_query",
+                "arguments": {"member_id": "TM001"},
+                "thought": "Người dùng muốn tra cứu hồ sơ/tình trạng đóng quỹ của thành viên. Tôi sẽ gọi tool member_query."
             }
         else:
             return {
                 "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "content": "[Mock Agent Response]: Xin chào! Mỗi thành viên đội đóng quỹ 100.000đ/tháng để duy trì chi phí thuê sân, bóng và áo đấu.",
+                "thought": "Câu hỏi chung về quy định quỹ đội, trả lời trực tiếp không cần gọi Tool."
             }
 
 
